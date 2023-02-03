@@ -66,4 +66,12 @@ class LogMessage {
         this.message = message;
         this.path = path;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getPath() {
+        return path;
+    }
 }

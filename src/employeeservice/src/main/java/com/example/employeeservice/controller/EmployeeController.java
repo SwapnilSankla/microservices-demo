@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.example.employeeservice.model.Employee;
 import com.example.employeeservice.repository.EmployeeRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,10 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    public Employee findById(@PathVariable("id") String id) {
-        LOGGER.info("Employee find: id={}", id);
+    public Employee findById(@PathVariable("id") String id) throws JsonProcessingException {
+        String message = "Employee find: id=" + id;
+        LOGGER.info(new ObjectMapper().writeValueAsString(new LogMessage(message, "/{id}")));
+//        LOGGER.info("Employee find: id={}", id);
         return repository.findById(id).get();
     }
 
@@ -51,4 +55,15 @@ public class EmployeeController {
         return repository.findByOrganizationId(organizationId);
     }
 
+}
+
+class LogMessage {
+    private String message;
+
+    private String path;
+
+    public LogMessage(String message, String path) {
+        this.message = message;
+        this.path = path;
+    }
 }

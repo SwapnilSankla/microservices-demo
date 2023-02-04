@@ -6,6 +6,8 @@ import com.example.employeeservice.model.Employee;
 import com.example.employeeservice.repository.EmployeeRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
+
 @RestController
 public class EmployeeController {
 
@@ -23,9 +27,15 @@ public class EmployeeController {
     @Autowired
     EmployeeRepository repository;
 
+    @Autowired
+    private MeterRegistry meterRegistry;
+
+    private Counter employeeCounter;
+
     @PostMapping("/")
     public Employee add(@RequestBody Employee employee) {
         LOGGER.info("Employee add: {}", employee);
+        employeeCounter.increment();
         return repository.save(employee);
     }
 
@@ -53,6 +63,11 @@ public class EmployeeController {
     public List<Employee> findByOrganization(@PathVariable("organizationId") String organizationId) {
         LOGGER.info("Employee find: organizationId={}", organizationId);
         return repository.findByOrganizationId(organizationId);
+    }
+
+    @PostConstruct
+    public void initEmployeeCounter() {
+        employeeCounter = this.meterRegistry.counter("employee.count", "count", "employee");
     }
 
 }
